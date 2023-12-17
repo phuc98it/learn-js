@@ -1,0 +1,56 @@
+static: luu lai gia tri cho bien dc khoi tao boi 1 object hoac class dc dinh nghia
+    +) co the coi nhu 1 property cua 1 Object.
+    -> khi khoi tao no se luu tru bien static.
+
+
+Function: co the coi la first-class
+
+1. Return Function
+    - Nhieu function -> return long
+    - Ham luon dung khi "return" -> tru khi return lai 1 ham
+        => khi return lai 1 ham -> dan toi ham do ko bao gio dung. 
+    - Ham 'con' co the truy xuat vao data cua ham 'cha'.
+
+2. Closure:
+    - la 1 kieu cua Higher Order Function
+    - cho phep thay doi bien private cua class hoac bien stactic cua Function.
+    => giong get() hoac set() trong class.
+
+3. Callback:
+    - goi 1 ham khac duoi dang tham so.
+    - vi du: map(), filter(), find(), reduce(), setTimeout(), ...
+    -> Ung dung: xac dinh thu tu goi ham.
+
+
+    *** Constructor_Function & Factory_Function ***
+- Constructor_Function giong Class-based.
+    +) dung 'new' de tao 1 object
+    +) this : dai dien cho 'thuoc tinh' cua chinh doi tuong dc khoi tao.
+    +) .propertype.<name_function> : khai bao 'phuong thuc' cho Contructor.
+    +) Class trong JS - thuc chat chi la function Constructor.
+
+- Factory_Function: dựa trên Closure và HOF.
+    +) return 1 object.
+    +) Mỗi property trong 'return object' chứa giá trị là 1 hàm truyền vào (callback).
+ 
+*) Module Patter: dựa vào Closure và HOF.
+    - là cơ sở xây dựng 'Singleton Pattern'
+    - IIFE dùng để  xây dựng một Object, giấu data không cho truy xuất từ bên ngoài -> chỉ đc tạo 1 object duy nhất.
+    - Đóng gói (Encapsulation)
+
+*) Function là 1 Object / Method:
+    - bind, call, apply là những function cho JS cung cấp giúp gán các object vào các hàm khác nhau.
+    - Bài toán: 
+        + Có 1 function chung.
+        + Các đối tượng có sẵn có dạng như nhau. (cùng tên thuộc tính, nhưng khác giá trị)
+    => Ban đầu phải xác định được 'property' chung.
+
+*) .prototype.<?>   : cho phép các function Constructor thêm 'property' hoặc 'function' cho chính nó.
+
+
+*) <array>.forEach(callback)    : có thể sử dụng thay thế cho for...of...
+        + callback : xử  lí các logic trong nó.
+
+*) Convention khi làm việc với callback:
+    - Thường viết body callback khi gọi hàm cha.
+    - tinh linh hoạt, mềm dẻo của callback cho phép pass nhiều cấu trúc body của callback khác nhau.
