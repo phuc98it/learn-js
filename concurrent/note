@@ -1,0 +1,16 @@
+============= concurrency - parallel ====================
+
+Bài toán: đường giao thông Việt Nam.
+	+) đường thường.
+	+) đường cao tốc.
+	+) đường sắt.
+	
+- concurrency (đồng thời) : cho phép xử lí các tác vụ khác nhau trên cùng 1 luồng.
+	-> tương đương với đường thường : cho phép các phường tiện khác nhau có thể đi chung trên 1 làn.
+	
+- parallel (song song) : mỗi luồng chỉ chuyên xử lí 1 số tác vụ nhất định, cùng loại.
+	-> tương đương với đường cao tốc : chỉ cho phép phương tiện di chuyển là ô tô, có để được đi và xử lí trong luồng đó.
+	
+- singer thread : chỉ xử lí 1 tác vụ trong 1 thời điểm.
+	-> tương đương với đường sắt : chỉ 1 tàu hỏa được di chuyển trong 1 thời điểm đó. 
+

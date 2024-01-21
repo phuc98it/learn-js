@@ -1,0 +1,91 @@
+Event Loop: chuyên xử  lí các tác vụ bất đồng bộ.
+    - quyết định việc đẩy các tác vụ ra callstack.
+    - theo thứ tự ưu tiên: 
+        1. rendering queue (brower)
+        2. nextTick() 
+        3. queueMicroTask(callback) và microTask     (promise, async-await) 
+        4. macroTask    (onClick, setTimeout, ...) 
+    - Không phụ thuộc vào V8 engine, mà do thư viện Livbuv (C) cung cấp cơ chế xử lí.
+
+JS: event do js cung cấp -> đơn luồng -> blocking (ví dụ: 'event')
+    
+NodeJS: là môi trường run mã JS.
+    - Biên dịch các đoạn mã JS -> thành ngôn ngữ C/C++, nhờ sự trợ giúp của V8 engine và Libuv.
+    - Hỗ  trợ các thư viện phía server: http-parser, cryto(OpenSSL), zlib(compression), ...
+    - Đặc biệt hỗ trợ Event-loop.
+
+*) Event Loop chạy trên "Main Thread" của JS.
+    - Event Loop dựa trên mỗi hệ điều hành - xử lí bất đồng bộ nhờ vào Kernel (vốn đa luồng), hoặc ThreadPool.
+        (ví dụ: epoll(Linux), kqueue(macOS), IOPC(Windows), ...)
+    + ThreadPool (hay còn gọi là Worker Pool) - chỉ phụ trách xử  lý 1 số  tác vụ I/O nhất định như file, crypto, DNS, ...
+    + HTTP request (network), do để  ko đồng bộ với brower -> dùng nhân hệ điều hàng (Linux) - với Kernel để xử lí phần network.
+        (mặc dù DNS do threadpool phụ trách) - ThreadPool phụ trách việc hứng 'data' response từ http request
+    + Worker Thread (khác với Worker Pool) - là module giúp JS chạy các luồng dạng parallel, chạy tác vụ tốn CPU.
+
+    - Event loop trên Node có nhiều phase xử lí khác nhau, xử lí theo trình tự.
+        (không phải 1 Stack - giống như callstack với cấu trúc LIFO, hoặc queue duy nhất FIFO).
+    + Trên mỗi phase lại có Queue riêng để  xử  lí tác vụ cùng nhóm. -> chính là MactoTask queue.
+
+    - Follow các phase: (Ex: file "loop.c")
+        timer -> pending (I/O) callbacks -> idle, prepare -> pool -> check -> close callbacks.
+        +) pending callback là 1 phần của pause, và 1 phần của phase.
+        +) Thời gian của EventLoop lớn hơn setTimeout hoăc ... -> thì mới đc thực thi, không thì đang trong phase Pending.
+        +) "timeout" là thời gian chờ của event-loop.   (cơ bản là block  ~ 0s)
+        +) pool là giai đoạn phức tạp nhất. (incoming: conncetion, data, ... )
+        +) check là giai đoạn kiểm tra 1 số thứ trong setImmediate.
+
+Tổng thời gian chờ = thời gian chờ (setTimeout) - thời gian hệ thống xử lí    
+
+    - setImmediate() sẽ đc gọi sau Poll phase.
+        -> 1 tác vụ ví dụ I/O File
+        + cho console.log(...) sẽ đc chạy trước so với setTimeout.
+            và sau khi thực hiện xong nó sẽ gọi setImmediate() -> setTimeout sẽ thực hiện sau.
+
+    - Nhiều ví dụ đc nêu thấy rằng thứ tự bị đảo lộn.
+    
+    
+ So sánh setTimeout(..., 0) và setImmediate()
+ 	+) setTimeout()	: thuộc phase time (đầu tiên của 1 phiên)
+ 	+) setImmediate()	: thuộc phase check (đứng sau phase 'Poll')
+ 	
+ -> Thứ tự chạy của 2 hàm không xác được - có thể xen kẽ.
+ 
+ - Nhưng khi để 2 hàm vào trong 1 callback() function -> thì:
+ 	+) first: hệ thống sẽ chạy với microTask - thuộc phase 'poll'.
+ 	+) second: xong khi phase 'poll' hoàn thành -> thì hệ thống nhảy sang trạng thái là phase 'check'.
+ 	+) third: sau khi phase hoàn thành -> thì hệ thống với quay ngược lại từ đầu và call phase 'timer'.
+ 	=> setImmediate() sẽ luôn luôn thực hiện trước so với setTimeout() trong 1 callback().
+ 	
+ 	
+============== Thread Pool ======================== 	
+- Dùng chủ yếu xử lý tác vụ I/O - liên quan tới file, crypto, dns, ...
+- Nhiệm vụ nên hiểu là môi trường - trung chuyển data, lọc (typefile, ...) đọc dữ liệu của file truyền tới. Việc xử lí nội dung file do module chuyên xử lí tác vụ đó.
+ 	+) Bình thường xử lí JS thông qua Main Thread (single thread - đơn luồng) và NodeJS dùng 1 core để xử lí.
+ 	+) Thread Pool : cung cấp nhiều luồng, song song với luồng chính để trung chuyển data. (tối đa 1024 Thread - từ libuv 1.3).
+ 	+) Thiết lập số lượng Thread, thông qua biến môi trường (env) : process.UV_THREADPOOL_SIZE.
+ 	+) Event-Loop để phân phối (Queue) tác vụ (task) cho hệ điều hành hoặc ThreadPool -> để xử lí bất đồng bộ.
+ - Khi thực thi lượng Thread ít hơn so với lượng tác vụ cần đc xử lí đồng thời, thì các tác vụ đó nhường nhạu trong quá trình xử lí.
+ 	
+ *) Tùy chọn khác : CLUSTER (> 1 nhân) và webworker-threads. (lựa chọn cho scale-up hệ thống, trong những trường hợp xử lí đa nhân).
+ 	-> Thread (luồng) và Core (nhân) khác nhau, mỗi cái đảm nhiệm 1 chức năng khác nhau.
+ 	
+ 
+ Ứng dụng kiến thức 'ThreadPool' -> để nâng cao hiệu suất xử lí import ảnh.
+- Tăng số lượng Thread trong resource = việc xét : process.UV_THREADPOOL_SIZE = n	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	

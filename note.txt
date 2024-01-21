@@ -54,3 +54,9 @@ Function: co the coi la first-class
 *) Convention khi làm việc với callback:
     - Thường viết body callback khi gọi hàm cha.
     - tinh linh hoạt, mềm dẻo của callback cho phép pass nhiều cấu trúc body của callback khác nhau.
+    
+    
+*) Serial - Sequen	: lập trình tuần tự (blocking).
+*) Parallel		: lập trình song song.
+*) Concurrent		: lập trình đồng thời (kết hợp cả tuần tự và song song).
+	- ứng dụng trong những bài toàn xử lí nhiều công việc khác nhau.
