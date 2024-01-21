@@ -60,3 +60,18 @@ Function: co the coi la first-class
 *) Parallel		: lập trình song song.
 *) Concurrent		: lập trình đồng thời (kết hợp cả tuần tự và song song).
 	- ứng dụng trong những bài toàn xử lí nhiều công việc khác nhau.
+
+5. HTTP/2
+- HTTP 1.1 (cũ) có thể  nhận nhiều request.
+    +) nhưng tại 1 thời điểm chỉ có thể  xử  lí được 1 request
+    +) dẫn đến việc bị 'thắt cổ  chai' khi quá nhiều request đến - mà ko đc xử  lí.
+        => Chết hệ thống.
+
+- HTTP/2 : sinh ra giải quyết vấn đề  trên, bằng cách cho phép 1 connection có thể  xử  lí nhiều yêu cầu trong cùng 1 lúc.
+    -> Ngay cả khi 1 số  request phải xử  lí lâu, thì những kết nối khác vẫn tiếp tục đc xử  lí -> ko bị kẹt.
+    => "Stream" event được kích hoạt mỗi khi request tới.  
+    (do các request được xử  lí song song 'parallel' - trên cùng 1 connection)
+    +) HTTP/2 ứng dụng thuật toán cho Header Compression mới - gọi là HPACK.
+    +) Phương thức: PUSH Server (đẩy request event -> tới Server khác).
+
+*) Brower ko hỗ  trợ 'unencrypted' HTTP/2 -> cần triển khai kết nối TLS qua giao thức HTTPS.
